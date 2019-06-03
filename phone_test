@@ -1,0 +1,99 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+					
+public class Program
+{	
+	/**
+	* Function: buscar
+	* Details:
+	* Parameters: texto, array con cada entrada del directorio telefonico 
+	*             criterio, criterio de busqueda 0: por nombre; 1: por ciudad	
+	*			  palabra, palabra a buscar
+	*/
+	public static string buscar(string[] texto, string criterio, string palabra) {
+		
+		string respuesta = "";
+		
+		// Buscar por ciudad
+		if(criterio == "1"){
+			// Pre-procesado: Obtener ciudades
+			Dictionary<string, string> cityList = loadCities(texto);
+			respuesta = cityList[palabra];
+		} else { // Buscar por nombre
+			
+			for(int i = 0; i < texto.Length; i++) {
+
+				string line = texto[i];
+
+				// Verifica que la entrada contenga la palabra a buscar y la agrega al listado resultante
+				if(line.Contains(palabra)) {
+					respuesta = respuesta + line + "\n";
+				}
+			}
+		}
+		return respuesta;
+	}
+	
+	/**
+	* Function: loadCities
+	* Details: Precalcula el listado de entradas para cada ciudad
+	* Parameters: data, lista completa de entradas telefonicas
+	*/
+	public static Dictionary<string, string> loadCities(string[] data){
+		
+		// Obtiene todas las ciudades (indices impares)
+		string[] cityTmp = (String.Concat(data)).Split('|');
+		
+		Dictionary<string, string> cityList = new Dictionary<string, string>();
+		
+		// i: indice de las ciudades obtenidas
+		// j: indice de las entradas telefonicas
+		for(int i = 1, j = 0; i < cityTmp.Length; j++) {
+
+			// Si el hash de la ciudad cityTmp[i] existe, se agrega la entrada que le corresponde
+			try{
+				
+				cityList[cityTmp[i]] += data[j] + "\n";	
+			}catch{
+				// Si el hash para la ciudad actual no existe, se agrega
+				
+				cityList.Add(cityTmp[i], "");
+				cityList[cityTmp[i]] += data[j] + "\n";
+			}
+			
+			i += 2;
+		}
+		
+		return cityList;
+	}
+	
+	public static void Main()
+	{
+		// Cargar data
+		Console.WriteLine("Escriba el fichero de entrada:");
+		string textFile = Console.ReadLine();
+		string[] data = File.ReadAllLines(textFile);
+		//string[] data = {"Tiger Juarez|Salem|05 02 28 62 41","Xena Terry|Rocca San Felice|02 56 37 82 49","Stephanie Nixon|Basildon|03 42 97 46 83","Quemby Kim|Salcito|09 06 10 81 36","Christian Henry|Overland Park|05 45 85 90 38","Shana Black|Oud-Turnhout|08 54 97 91 79","Hayes Gonzalez|Colli a Volturno|01 97 35 07 81","Caleb Reyes|San Rafael|04 81 93 40 46","Kyle Leblanc|Ponoka|03 63 73 56 56","Jenna Roth|Colorno|09 49 19 64 72","Jeanette Stokes|Coronel|08 61 71 37 83","Cora Beard|Lauco|08 99 03 75 72","Amy Owens|Acquafondata|02 35 05 44 37","Emma Clements|Lac-Serent|09 08 32 99 34","Alice Small|Ophain-Bois-Seigneur-Isaac|05 88 52 85 83","Kevin Glover|Nethen|06 03 53 20 01","Oren Carrillo|Brunn am Gebirge|06 34 61 02 75","Orlando Zamora|Namen|07 96 94 23 28","Elvis Lindsey|Bognor Regis|01 71 71 40 66","Leilani Humphrey|Toernich|07 51 96 45 32","Thane Collier|Purranque|03 12 47 80 44","Stone Henson|Vieux-Genappe|02 99 92 74 02","Bruno Henson|Macklin|08 05 36 40 35","Casey Mayer|Muno|03 12 87 84 90","Alfreda Berger|Hualañé|08 95 84 75 29","Caesar Patrick|Ferrazzano|09 90 68 82 53","Lamar Strickland|RosiŽres|02 03 21 16 82","Quynn Bailey|Torno|05 72 49 35 37","Freya Bowman|Bremerhaven|06 29 04 53 04","Cyrus Chen|Tucson|08 66 86 09 70","Elaine Hodge|Sainte-Marie-sur-Semois|03 68 19 99 82","Lani Jefferson|Raurkela|04 22 22 31 79","Phelan House|Kusadasi|02 00 96 97 50","Veda Chang|Workum|03 66 41 45 64","Farrah Valenzuela|Leominster|08 48 65 82 95","Evan Wolfe|Hulshout|02 34 10 15 34","Jessamine Mayer|Etobicoke|06 66 51 09 48","Leigh Holt|Skegness|01 68 24 22 41","Shad Webster|Swindon|01 38 26 96 40","Brielle Oneal|Roosdaal|05 61 81 67 68","Wang Cummings|Minneapolis|07 83 35 85 24","Isaiah Barnett|Perk|09 41 09 62 47","Maggie Mcfarland|Parrano|01 20 06 37 67","Quin Dawson|Mount Gambier|04 89 35 24 60","Rhonda Booker|ThimŽon|01 53 65 69 34","Ivory Downs|Viña del Mar|01 32 59 27 53","Daphne Osborne|Baranello|05 38 64 23 07","Keith Tucker|Legal|07 55 29 49 12","Scarlett Molina|Blankenfelde-Mahlow|09 13 27 26 70","Rahim Cruz|Lairg|08 73 17 70 26","Elijah Berger|Sint-Gillis|08 62 01 92 50","Lysandra Kline|Jamoigne|06 77 88 44 58","Beau Joyce|St. Austell|02 72 42 84 86","Matthew Hunter|Mont-de-Marsan|05 81 18 84 31","Xaviera Hoffman|Hulste|07 82 91 72 27","Clayton Meyers|Viersel|04 53 43 95 39","Shelley Gay|Leeds|02 81 36 16 29","Evelyn Shannon|Saint-Sébastien-sur-Loire|05 54 38 35 87","Jana Curry|Cincinnati|03 69 40 03 35","Ria Bartlett|Meeuwen-Gruitrode|08 26 10 20 49","Inga Berg|Görlitz|03 60 33 85 89","Hedley Colon|Dos Hermanas|07 09 45 07 05","Ora Ellis|Baiso|01 93 67 13 03","Clinton William|Bijapur|06 51 16 65 95","Owen Ballard|Meugliano|05 74 82 68 65","Driscoll Brady|Monte San Giovanni in Sabina|01 40 67 48 23","Wyoming Hoffman|Picture Butte|06 34 15 64 64","Keegan Vinson|Autelbas|09 21 04 41 09","Adele Campbell|Weymouth|03 58 28 82 70","Fiona James|Wichita|01 63 97 56 19","Damon Griffith|Oviedo|09 24 53 59 50","Ali Flores|Orange|08 87 47 85 90","Shelby Potter|Wolfenbüttel|04 15 18 30 98","Autumn Flowers|Sloten|07 69 40 24 96","Brenda Rosa|Schleswig|02 61 44 97 72","John Little|Poznan|09 41 36 47 40","Indira Campbell|Fogo|09 64 92 38 59","Rafael Harrington|Erembodegem|02 78 92 37 15","Clark Gaines|Wekweti|03 30 39 06 18","Fallon Carney|Chaitén|05 30 62 58 70","Nina Cervantes|Harrisburg|03 39 70 56 47","William Park|Inveraray|05 17 10 62 42","Neil Patton|Hofors|04 81 77 81 57","Tara Vasquez|Glendale|05 11 01 93 53","Jordan Parrish|Dhuy|09 71 97 41 56","Beau Mcgee|Santipur|05 37 23 35 57","Zachery Wilkerson|Augusta|06 54 94 11 55","Luke Hardin|Grado|04 38 78 93 69","Liberty Morales|Padre Hurtado|09 13 33 61 47","Hamish Dalton|Devon|04 73 09 42 06","Dana Callahan|Balfour|04 15 76 18 36","Robin Slater|Laguna Blanca|06 66 82 41 08","Macey Phillips|Palmiano|06 43 33 09 36","Suki Wheeler|Caruaru|06 76 06 34 64","Iola Faulkner|Lochristi|07 03 63 81 08","Colton Bernard|Codognè|07 47 99 88 67","Davis Tate|Falkirk|04 58 55 58 74","Cyrus Cochran|Oviedo|03 99 83 80 94","Aurelia Flynn|Peterhead|02 69 62 04 21","Hammett Robbins|Zerba|06 42 25 94 38","Tiger Juarez|Salem|05 02 28 62 41","Xena Terry|Rocca San Felice|02 56 37 82 49","Stephanie Nixon|Basildon|03 42 97 46 83","Quemby Kim|Salcito|09 06 10 81 36","Christian Henry|Overland Park|05 45 85 90 38","Shana Black|Oud-Turnhout|08 54 97 91 79","Hayes Gonzalez|Colli a Volturno|01 97 35 07 81","Caleb Reyes|San Rafael|04 81 93 40 46","Kyle Leblanc|Ponoka|03 63 73 56 56","Jenna Roth|Colorno|09 49 19 64 72","Jeanette Stokes|Coronel|08 61 71 37 83","Cora Beard|Lauco|08 99 03 75 72","Amy Owens|Acquafondata|02 35 05 44 37","Emma Clements|Lac-Serent|09 08 32 99 34","Alice Small|Ophain-Bois-Seigneur-Isaac|05 88 52 85 83","Kevin Glover|Nethen|06 03 53 20 01","Oren Carrillo|Brunn am Gebirge|06 34 61 02 75","Orlando Zamora|Namen|07 96 94 23 28","Elvis Lindsey|Bognor Regis|01 71 71 40 66","Leilani Humphrey|Toernich|07 51 96 45 32","Thane Collier|Purranque|03 12 47 80 44","Stone Henson|Vieux-Genappe|02 99 92 74 02","Bruno Henson|Macklin|08 05 36 40 35","Casey Mayer|Muno|03 12 87 84 90","Alfreda Berger|Hualañé|08 95 84 75 29","Caesar Patrick|Ferrazzano|09 90 68 82 53","Lamar Strickland|RosiŽres|02 03 21 16 82","Quynn Bailey|Torno|05 72 49 35 37","Freya Bowman|Bremerhaven|06 29 04 53 04","Cyrus Chen|Tucson|08 66 86 09 70","Elaine Hodge|Sainte-Marie-sur-Semois|03 68 19 99 82","Lani Jefferson|Raurkela|04 22 22 31 79","Phelan House|Kusadasi|02 00 96 97 50","Veda Chang|Workum|03 66 41 45 64","Farrah Valenzuela|Leominster|08 48 65 82 95","Evan Wolfe|Hulshout|02 34 10 15 34","Jessamine Mayer|Etobicoke|06 66 51 09 48","Leigh Holt|Skegness|01 68 24 22 41","Shad Webster|Swindon|01 38 26 96 40","Brielle Oneal|Roosdaal|05 61 81 67 68","Wang Cummings|Minneapolis|07 83 35 85 24","Isaiah Barnett|Perk|09 41 09 62 47","Maggie Mcfarland|Parrano|01 20 06 37 67","Quin Dawson|Mount Gambier|04 89 35 24 60","Rhonda Booker|ThimŽon|01 53 65 69 34","Ivory Downs|Viña del Mar|01 32 59 27 53","Daphne Osborne|Baranello|05 38 64 23 07","Keith Tucker|Legal|07 55 29 49 12","Scarlett Molina|Blankenfelde-Mahlow|09 13 27 26 70","Rahim Cruz|Lairg|08 73 17 70 26","Elijah Berger|Sint-Gillis|08 62 01 92 50","Lysandra Kline|Jamoigne|06 77 88 44 58","Beau Joyce|St. Austell|02 72 42 84 86","Matthew Hunter|Mont-de-Marsan|05 81 18 84 31","Xaviera Hoffman|Hulste|07 82 91 72 27","Clayton Meyers|Viersel|04 53 43 95 39","Shelley Gay|Leeds|02 81 36 16 29","Evelyn Shannon|Saint-Sébastien-sur-Loire|05 54 38 35 87","Jana Curry|Cincinnati|03 69 40 03 35","Ria Bartlett|Meeuwen-Gruitrode|08 26 10 20 49","Inga Berg|Görlitz|03 60 33 85 89","Hedley Colon|Dos Hermanas|07 09 45 07 05","Ora Ellis|Baiso|01 93 67 13 03","Clinton William|Bijapur|06 51 16 65 95","Owen Ballard|Meugliano|05 74 82 68 65","Driscoll Brady|Monte San Giovanni in Sabina|01 40 67 48 23","Wyoming Hoffman|Picture Butte|06 34 15 64 64","Keegan Vinson|Autelbas|09 21 04 41 09","Adele Campbell|Weymouth|03 58 28 82 70","Fiona James|Wichita|01 63 97 56 19","Damon Griffith|Oviedo|09 24 53 59 50","Ali Flores|Orange|08 87 47 85 90","Shelby Potter|Wolfenbüttel|04 15 18 30 98","Autumn Flowers|Sloten|07 69 40 24 96","Brenda Rosa|Schleswig|02 61 44 97 72","John Little|Poznan|09 41 36 47 40","Indira Campbell|Fogo|09 64 92 38 59","Rafael Harrington|Erembodegem|02 78 92 37 15","Clark Gaines|Wekweti|03 30 39 06 18","Fallon Carney|Chaitén|05 30 62 58 70","Nina Cervantes|Harrisburg|03 39 70 56 47","William Park|Inveraray|05 17 10 62 42","Neil Patton|Hofors|04 81 77 81 57","Tara Vasquez|Glendale|05 11 01 93 53","Jordan Parrish|Dhuy|09 71 97 41 56","Beau Mcgee|Santipur|05 37 23 35 57","Zachery Wilkerson|Augusta|06 54 94 11 55","Luke Hardin|Grado|04 38 78 93 69","Liberty Morales|Padre Hurtado|09 13 33 61 47","Hamish Dalton|Devon|04 73 09 42 06","Dana Callahan|Balfour|04 15 76 18 36","Robin Slater|Laguna Blanca|06 66 82 41 08","Macey Phillips|Palmiano|06 43 33 09 36","Suki Wheeler|Caruaru|06 76 06 34 64","Iola Faulkner|Lochristi|07 03 63 81 08","Colton Bernard|Codognè|07 47 99 88 67","Davis Tate|Falkirk|04 58 55 58 74","Cyrus Cochran|Oviedo|03 99 83 80 94","Aurelia Flynn|Peterhead|02 69 62 04 21","Hammett Robbins|Zerba|06 42 25 94 38","Tiger Juarez|Salem|05 02 28 62 41","Xena Terry|Rocca San Felice|02 56 37 82 49","Stephanie Nixon|Basildon|03 42 97 46 83","Quemby Kim|Salcito|09 06 10 81 36","Christian Henry|Overland Park|05 45 85 90 38","Shana Black|Oud-Turnhout|08 54 97 91 79","Hayes Gonzalez|Colli a Volturno|01 97 35 07 81","Caleb Reyes|San Rafael|04 81 93 40 46","Kyle Leblanc|Ponoka|03 63 73 56 56","Jenna Roth|Colorno|09 49 19 64 72","Jeanette Stokes|Coronel|08 61 71 37 83","Cora Beard|Lauco|08 99 03 75 72","Amy Owens|Acquafondata|02 35 05 44 37","Emma Clements|Lac-Serent|09 08 32 99 34","Alice Small|Ophain-Bois-Seigneur-Isaac|05 88 52 85 83","Kevin Glover|Nethen|06 03 53 20 01","Oren Carrillo|Brunn am Gebirge|06 34 61 02 75","Orlando Zamora|Namen|07 96 94 23 28","Elvis Lindsey|Bognor Regis|01 71 71 40 66","Leilani Humphrey|Toernich|07 51 96 45 32","Thane Collier|Purranque|03 12 47 80 44","Stone Henson|Vieux-Genappe|02 99 92 74 02","Bruno Henson|Macklin|08 05 36 40 35","Casey Mayer|Muno|03 12 87 84 90","Alfreda Berger|Hualañé|08 95 84 75 29","Caesar Patrick|Ferrazzano|09 90 68 82 53","Lamar Strickland|RosiŽres|02 03 21 16 82","Quynn Bailey|Torno|05 72 49 35 37","Freya Bowman|Bremerhaven|06 29 04 53 04","Cyrus Chen|Tucson|08 66 86 09 70","Elaine Hodge|Sainte-Marie-sur-Semois|03 68 19 99 82","Lani Jefferson|Raurkela|04 22 22 31 79","Phelan House|Kusadasi|02 00 96 97 50","Veda Chang|Workum|03 66 41 45 64","Farrah Valenzuela|Leominster|08 48 65 82 95","Evan Wolfe|Hulshout|02 34 10 15 34","Jessamine Mayer|Etobicoke|06 66 51 09 48","Leigh Holt|Skegness|01 68 24 22 41","Shad Webster|Swindon|01 38 26 96 40","Brielle Oneal|Roosdaal|05 61 81 67 68","Wang Cummings|Minneapolis|07 83 35 85 24","Isaiah Barnett|Perk|09 41 09 62 47","Maggie Mcfarland|Parrano|01 20 06 37 67","Quin Dawson|Mount Gambier|04 89 35 24 60","Rhonda Booker|ThimŽon|01 53 65 69 34","Ivory Downs|Viña del Mar|01 32 59 27 53","Daphne Osborne|Baranello|05 38 64 23 07","Keith Tucker|Legal|07 55 29 49 12","Scarlett Molina|Blankenfelde-Mahlow|09 13 27 26 70","Rahim Cruz|Lairg|08 73 17 70 26","Elijah Berger|Sint-Gillis|08 62 01 92 50","Lysandra Kline|Jamoigne|06 77 88 44 58","Beau Joyce|St. Austell|02 72 42 84 86","Matthew Hunter|Mont-de-Marsan|05 81 18 84 31","Xaviera Hoffman|Hulste|07 82 91 72 27","Clayton Meyers|Viersel|04 53 43 95 39","Shelley Gay|Leeds|02 81 36 16 29","Evelyn Shannon|Saint-Sébastien-sur-Loire|05 54 38 35 87","Jana Curry|Cincinnati|03 69 40 03 35","Ria Bartlett|Meeuwen-Gruitrode|08 26 10 20 49","Inga Berg|Görlitz|03 60 33 85 89","Hedley Colon|Dos Hermanas|07 09 45 07 05","Ora Ellis|Baiso|01 93 67 13 03","Clinton William|Bijapur|06 51 16 65 95","Owen Ballard|Meugliano|05 74 82 68 65","Driscoll Brady|Monte San Giovanni in Sabina|01 40 67 48 23","Wyoming Hoffman|Picture Butte|06 34 15 64 64","Keegan Vinson|Autelbas|09 21 04 41 09","Adele Campbell|Weymouth|03 58 28 82 70","Fiona James|Wichita|01 63 97 56 19","Damon Griffith|Oviedo|09 24 53 59 50","Ali Flores|Orange|08 87 47 85 90","Shelby Potter|Wolfenbüttel|04 15 18 30 98","Autumn Flowers|Sloten|07 69 40 24 96","Brenda Rosa|Schleswig|02 61 44 97 72","John Little|Poznan|09 41 36 47 40","Indira Campbell|Fogo|09 64 92 38 59","Rafael Harrington|Erembodegem|02 78 92 37 15","Clark Gaines|Wekweti|03 30 39 06 18","Fallon Carney|Chaitén|05 30 62 58 70","Nina Cervantes|Harrisburg|03 39 70 56 47","William Park|Inveraray|05 17 10 62 42","Neil Patton|Hofors|04 81 77 81 57","Tara Vasquez|Glendale|05 11 01 93 53","Jordan Parrish|Dhuy|09 71 97 41 56","Beau Mcgee|Santipur|05 37 23 35 57","Zachery Wilkerson|Augusta|06 54 94 11 55","Luke Hardin|Grado|04 38 78 93 69","Liberty Morales|Padre Hurtado|09 13 33 61 47","Hamish Dalton|Devon|04 73 09 42 06","Dana Callahan|Balfour|04 15 76 18 36","Robin Slater|Laguna Blanca|06 66 82 41 08","Macey Phillips|Palmiano|06 43 33 09 36","Suki Wheeler|Caruaru|06 76 06 34 64","Iola Faulkner|Lochristi|07 03 63 81 08","Colton Bernard|Codognè|07 47 99 88 67","Davis Tate|Falkirk|04 58 55 58 74","Cyrus Cochran|Oviedo|03 99 83 80 94","Aurelia Flynn|Peterhead|02 69 62 04 21","Hammett Robbins|Zerba|06 42 25 94 38","Tiger Juarez|Salem|05 02 28 62 41","Xena Terry|Rocca San Felice|02 56 37 82 49","Tiger Juarez|Salem|05 02 28 62 41","Xena Terry|Rocca San Felice|02 56 37 82 49","Stephanie Nixon|Basildon|03 42 97 46 83","Quemby Kim|Salcito|09 06 10 81 36","Christian Henry|Overland Park|05 45 85 90 38","Shana Black|Oud-Turnhout|08 54 97 91 79","Hayes Gonzalez|Colli a Volturno|01 97 35 07 81","Caleb Reyes|San Rafael|04 81 93 40 46","Kyle Leblanc|Ponoka|03 63 73 56 56","Jenna Roth|Colorno|09 49 19 64 72","Jeanette Stokes|Coronel|08 61 71 37 83","Cora Beard|Lauco|08 99 03 75 72","Amy Owens|Acquafondata|02 35 05 44 37","Emma Clements|Lac-Serent|09 08 32 99 34","Alice Small|Ophain-Bois-Seigneur-Isaac|05 88 52 85 83","Kevin Glover|Nethen|06 03 53 20 01","Oren Carrillo|Brunn am Gebirge|06 34 61 02 75","Orlando Zamora|Namen|07 96 94 23 28","Elvis Lindsey|Bognor Regis|01 71 71 40 66","Leilani Humphrey|Toernich|07 51 96 45 32","Thane Collier|Purranque|03 12 47 80 44","Stone Henson|Vieux-Genappe|02 99 92 74 02","Bruno Henson|Macklin|08 05 36 40 35","Casey Mayer|Muno|03 12 87 84 90","Alfreda Berger|Hualañé|08 95 84 75 29","Caesar Patrick|Ferrazzano|09 90 68 82 53","Lamar Strickland|RosiŽres|02 03 21 16 82","Quynn Bailey|Torno|05 72 49 35 37","Freya Bowman|Bremerhaven|06 29 04 53 04","Cyrus Chen|Tucson|08 66 86 09 70","Elaine Hodge|Sainte-Marie-sur-Semois|03 68 19 99 82","Lani Jefferson|Raurkela|04 22 22 31 79","Phelan House|Kusadasi|02 00 96 97 50","Veda Chang|Workum|03 66 41 45 64","Farrah Valenzuela|Leominster|08 48 65 82 95","Evan Wolfe|Hulshout|02 34 10 15 34","Jessamine Mayer|Etobicoke|06 66 51 09 48","Leigh Holt|Skegness|01 68 24 22 41","Shad Webster|Swindon|01 38 26 96 40","Brielle Oneal|Roosdaal|05 61 81 67 68","Wang Cummings|Minneapolis|07 83 35 85 24","Isaiah Barnett|Perk|09 41 09 62 47","Maggie Mcfarland|Parrano|01 20 06 37 67","Quin Dawson|Mount Gambier|04 89 35 24 60","Rhonda Booker|ThimŽon|01 53 65 69 34","Ivory Downs|Viña del Mar|01 32 59 27 53","Daphne Osborne|Baranello|05 38 64 23 07","Keith Tucker|Legal|07 55 29 49 12","Scarlett Molina|Blankenfelde-Mahlow|09 13 27 26 70"};
+				
+		// Obtener criterio de busqueda
+		Console.WriteLine("Escriba el criterio de busqueda [0: Nombre; 1: Ciudad]:");
+		string criterio = Console.ReadLine();
+		
+		if(criterio == "0") {
+			// Obtener palabra clave
+			Console.WriteLine("Escriba el nombre a buscar:");
+			string nombre = Console.ReadLine();
+
+			// Realizar busqueda
+			Console.WriteLine(buscar(data, "0", nombre));
+		} else {
+			// Obtener palabra clave
+			Console.WriteLine("Escriba la ciudad a buscar:");
+			string ciudad = Console.ReadLine();
+
+			// Realizar busqueda
+			Console.WriteLine(buscar(data, "1", ciudad));
+		}
+	}
+}
